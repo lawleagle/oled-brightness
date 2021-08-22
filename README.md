@@ -16,18 +16,29 @@ sudo apt install inotify-tools
 - **sunwait** - (optional) used for monitoring day/night cycle for night light feature
 - **geoclue2** - (optional) used for getting current location for day/night cycle for night light feature. Optional because locaiton can be set manually
 
-## How To Install - Ubuntu
-Clone the repository and add **oled-linux.sh** to your startup applications. See https://help.ubuntu.com/stable/ubuntu-help/startup-applications.html.en. Can test the script by just running it and it should autostart on next login.
+## Installation (Ubuntu)
 
-Optionally can add **get-current-location.sh**, **watch-location.sh**, **run-set-day-night.sh** for Redshift. Needs to be enabled in the config section of **oled-linux.sh** as well.
+```bash
+sudo apt install inotify-tools
+```
+
+Clone the repository and add **oled-linux.sh** to your [startup applications](https://help.ubuntu.com/stable/ubuntu-help/startup-applications.html.en).
+You can test the script by simply running it, but you should add it to startup applications to run it automatically.
+
+Optionally you can add **get-current-location.sh**, **watch-location.sh**, **run-set-day-night.sh** for Redshift (Night Light) functionality.
+This also requires installing:
+```bash
+sudo apt install redshift geoclue-2.0 geoclue-2.0 geoclue-2-demo
+snap install sunwait
+```
 
 ## Night Light
-If night light is enabled in **oled-linux.sh**, all brightness changes are applied using **redshift**, which allows for nightlight support. If night light is disabled in the config, brightness changes will be applied with **xrandr**.
+If night light is enabled in **oled-linux.sh**, all brightness changes are applied using `redshift`, which allows for Night Light support. If Night Light is disabled in the config, brightness changes will be applied with **xrandr**.
 **oled-linux.sh** will also watch for the file **file-pipes/day-night.txt**, and if the contents of the file are **NIGHT**, a night filter will be applied
 
-Default vaules for night filter
-DAY = 6500 (default, unchanged display)
-NIGHT = 3500 (default night-filter value)
+Default values for night filter:  
+`DAY = 6500` (default, unchanged display)
+`NIGHT = 3500` (default night-filter value)
 
 We can change the night filter value to whatever you want by modifying **oled-linux.sh** (see configuration section). W can also adjuse the daylight value so we can add a filter during the day too.
 
@@ -40,33 +51,39 @@ Night Light can work without geolocation, in which case you can skip loading **g
 ## Configuration
 Configuration is provided at the top of **oled-linux.sh**.
 ```bash
-# where is the backlight directory?
+##
+# Backlight driver file location
 backlight_dir="/sys/class/backlight/intel_backlight/"
 
-# which screen is the oled panel?
-# if not set, it will default to `xrandr | grep -m 1 ' connected ' | awk '{print $1}'`
-# leaving it empty will "just work" in most cases
-#
-# do xrandr command for a list of screen names
-# e-DP1 is an example of a good screen name
+##
+# OLED Display Name
+# If not set the script will attempt to guess it.
+# Use `xrandr --current | grep ' connected'` to get a list of all conntected
+# displays. Examples are: e-DP1, eDP-1, eDP-1-1
 oled_screen=''
 
-# how much to change the brightness on one frame
-# or how smooth should the brightness changes be
-# the lower the value the longer it takes to transition to a new brightness
-# has to be an integer value, no fractional values are allowed
-brightness_step_size=12
+##
+# Brightness step size
+# How quickly to change the screen brightness?
+# Values between 1(immediately) to 500(it takes about 10 seconds for the whole range) make sense.
+# Default is 10.
+brightness_step_size_factor=10
 
-# if true, the program will look for changes in 'day_night.txt' and update the redshift temperature accordingly
-# check 'set_day_night.sh' to see how 'day_night.txt' is updated
+##
+# Redshift (Night Light) functionality
+# If enabled the script will also change the color temperature of the display.
 use_redshift=true
 
-# nightshift temperature during the day
+##
+# Color temperature during the day
 daylight_temperature=6500
 
-# nightshift temperature during the night
-night_temperature=3500
+##
+# Color temperature at night
+night_temperature=4800
 
+##
+# Color temperature step
 # how much to change the temperature of the night light on one frarme
 # the lower the value, the longer it takes to transition to a new redshift temperature
 # has to be an integer value, no fractional values are allowed
